@@ -1,9 +1,12 @@
 import { utimes } from 'fs/promises'
 import * as path from 'upath'
+import _debug from 'debug'
 import { cacheDir, writeStyles } from '@vuetify/loader-shared'
 
 import type { PluginOption, ViteDevServer } from 'vite'
 import type { Options } from '@vuetify/loader-shared'
+
+const debug = _debug('vuetify:styles')
 
 function isSubdir (root: string, test: string) {
   const relative = path.relative(root, test)
@@ -20,22 +23,67 @@ export function stylesPlugin (options: Options): PluginOption {
   let resolve: (v: any) => void
   let promise: Promise<any> | null
   let timeout: NodeJS.Timeout
+  let pollTimeout: NodeJS.Timeout
   let needsTouch = false
+  const blockingModules = new Set<string>()
 
-  async function awaitResolve () {
+  function getPendingModules () {
+    return Object.entries(server._pendingRequests)
+      .filter(([k, v]) => v != null)
+      .map(([k]) => {
+        const module = server.moduleGraph.urlToModuleMap.get(k)
+        if (!module) {
+          debug(`module not found: ${k}`)
+        }
+        return module?.id
+      })
+      .filter(Boolean) as string[]
+  }
+
+  function poll () {
+    clearTimeout(pollTimeout)
+    pollTimeout = setTimeout(() => {
+      const pendingModules = getPendingModules()
+
+      if (blockingModules.size === pendingModules.length && pendingModules.every(id => blockingModules.has(id))) {
+        blockingModules.clear()
+        clearTimeout(timeout)
+        resolve(true)
+      } else {
+        debug('poll')
+        poll()
+      }
+    }, 100)
+  }
+
+  async function awaitResolve (id?: string) {
     clearTimeout(timeout)
     timeout = setTimeout(() => {
+      console.error('vuetify:styles fallback timeout hit', {
+        blockingModules: Array.from(blockingModules.values()),
+        pendingModules: getPendingModules(),
+      })
       resolve(true)
     }, 500)
+
+    if (id) {
+      blockingModules.add(id)
+    }
+
+    poll()
 
     if (!promise) {
       promise = new Promise((_resolve) => resolve = _resolve)
       await promise
+      debug('writing styles')
       await writeStyles(files)
       if (server && needsTouch) {
         server.moduleGraph.getModulesByFile(cacheDir('styles.scss'))?.forEach(module => {
           module.importers.forEach(module => {
-            module.file && utimes(module.file, Date.now(), Date.now())
+            if (module.file) {
+              debug(`touching ${module.file}`)
+              utimes(module.file, Date.now(), Date.now())
+            }
           })
         })
         needsTouch = false
@@ -88,7 +136,8 @@ export function stylesPlugin (options: Options): PluginOption {
         ['.scss', '.sass'].some(v => id.endsWith(v)) &&
         styleImportRegexp.test(code)
       ) {
-        await awaitResolve()
+        debug(`awaiting ${id}`)
+        await awaitResolve(id)
 
         return code.replace(styleImportRegexp, '@use ".cache/vuetify/styles.scss"')
       }
