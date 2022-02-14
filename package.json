@@ -1,11 +1,11 @@
 {
-  "name": "vuetify-loader",
-  "version": "1.7.3",
+  "name": "@uifox-at-doxo/vuetify-loader",
+  "version": "1.0.0",
   "description": "A Webpack plugin for treeshaking Vuetify components and more",
   "main": "lib/index.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/vuetifyjs/vuetify-loader.git"
+    "url": "git+https://github.com/uifox/vuetify-loader.git"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
