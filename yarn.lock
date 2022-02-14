@@ -7,11 +7,6 @@
   resolved "https://registry.yarnpkg.com/@types/json-schema/-/json-schema-7.0.6.tgz#f4c7ec43e81b319a9815115031709f26987891f0"
   integrity sha512-3c+yGKvVP5Y9TYBEibGNR+kLtijnj7mYrXRg+WpFb2X9xm04g/DXYkfg4hmzJQosc9snFNUPkbYIhu+KAm6jJw==
 
-"@uifox-at-doxo/vuetify@^1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@uifox-at-doxo/vuetify/-/vuetify-1.0.0.tgz#ebdfb5e203e978f54e22b3a3b3b5f14212395e1d"
-  integrity sha512-0hnd7vFjQe/Eca2y63w9Q9xPSZMBcTHxEhOidcny1hAKu4qa26lXye4smDUyJ13/GG5qPipI0P5yF2TSjMHSQg==
-
 ajv-keywords@^3.5.2:
   version "3.5.2"
   resolved "https://registry.yarnpkg.com/ajv-keywords/-/ajv-keywords-3.5.2.tgz#31f29da5ab6e00d1c2d329acf7b5929614d5014d"
