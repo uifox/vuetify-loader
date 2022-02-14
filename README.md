@@ -92,7 +92,7 @@ Will be compiled into:
 </template>
 
 <script>
-  import { VCard } from 'vuetify/lib'
+  import { VCard } from '@uifox-at-doxo/vuetify/lib'
   import CoreForm from '@/components/core/Form.vue'
 
   export default {
